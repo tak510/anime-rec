@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const router = useRouter();
 
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent page reload
     setErrorMsg('');
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
@@ -21,7 +23,7 @@ export default function LoginPage() {
     if (error) {
         setErrorMsg(error.message);
     } else {
-        console.log('Logged in:', data);
+        router.push('/dashboard')
     }
 };
 
