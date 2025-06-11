@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
       e.preventDefault(); // Prevent page reload
@@ -25,6 +27,7 @@ export default function SignUpPage() {
       } else {
           if (!data.session || !data.user?.confirmed_at) {
             setSuccessMsg('Signup successful! Please check your email to confirm your address.')
+            router.push(`/signup/loadconfirm?email=${encodeURIComponent(email)}`);
           }
       }
   };
@@ -53,7 +56,6 @@ export default function SignUpPage() {
             Sign Up
           </button>
         </form>
-        <br></br>
         <div>
           {errorMsg && <p className="text-red-500 mt-2">{errorMsg}</p>}
           <p className="text-green-400">{successMsg}</p>
