@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import Navbar from './components/Navbar'
 
 interface JikanAnime {
   mal_id: number
@@ -33,9 +32,8 @@ export default async function HomePage() {
 
   return (
     <>
-      <Navbar />
     <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Popular Anime</h1>
+      <h1 className="text-3xl font-bold mb-6">Recommended for You:</h1>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {animeList.map((anime) => (
