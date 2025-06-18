@@ -12,7 +12,7 @@ export default function Navbar() {
     <nav className="flex items-center justify-between px-6 py-4 bg-gray-900 text-white shadow-md">
       {}
       <div className="flex items-center space-x-3">
-        <Image src="/av_logo.png" alt="Anivex" width={80} height={80} />
+        <Link href="/"><Image src="/av_logo.png" alt="Anivex" width={80} height={80} /> </Link>
         <span className="text-xl font-bold">Anivex</span>
       </div>
 

@@ -39,7 +39,7 @@ export default function ProfileDropdown() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={() => setOpen(!open)} className="focus:outline-none">
+      <button onClick={() => setOpen(!open)} className="focus:outline-none cursor-pointer">
         <Image
           src="/placeholder-profile.png"
           alt="Profile"

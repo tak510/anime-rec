@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../../hooks/useAuth'
 import { useEffect, useState } from 'react'
 
 export default function Dashboard() {
