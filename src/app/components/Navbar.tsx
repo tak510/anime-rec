@@ -18,7 +18,7 @@ export default function Navbar() {
 
       {}
       <div className="hidden md:flex space-x-6 text-sm">
-        <Link href="/" className="hover:text-emerald-400">Recommended</Link>
+        <Link href="/recommended" className="hover:text-emerald-400">Recommended</Link>
         <Link href="/popular" className="hover:text-emerald-400">Popular</Link>
         <Link href="/trending" className="hover:text-emerald-400">Trending</Link>
         <Link href="/upcoming" className="hover:text-emerald-400">Upcoming</Link>
