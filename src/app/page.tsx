@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Head from 'next/head'
+import Navbar from './components/Navbar'
 
 export default function LandingPage() {
   return (
@@ -10,14 +11,7 @@ export default function LandingPage() {
         <title>Anivex – The Pulse of Anime Fandom</title>
       </Head>
 
-      {/* Navbar */}
-      <header className="flex justify-between items-center px-8 py-4 bg-[#1D1D1F] border-b border-[#2FFFE2]">
-        <h1 className="text-2xl font-orbitron text-[#FF5DA2]">Anivex</h1>
-        <nav className="space-x-6 text-sm font-medium">
-          <Link href="/login" className="hover:text-[#2FFFE2]">Login</Link>
-          <Link href="/signup" className="hover:text-[#2FFFE2]">Register</Link>
-        </nav>
-      </header>
+      <Navbar />
 
       {/* Hero */}
       <section className="text-center py-20 bg-gradient-to-r from-[#6B4CA0] to-[#FF5DA2] text-[#F5EDF7]">
@@ -58,8 +52,8 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-[#1D1D1F] border-t border-[#2FFFE2] py-6 text-center text-sm text-[#F5EDF7]">
-        &copy; {new Date().getFullYear()} Anivex. Built by an anime lover, for anime lovers.
+        &copy; {new Date().getFullYear()} Anivex. Built by an anime lover, for anime lovers. Icon: <a href="https://www.flaticon.com/free-icons/anime" title="anime icons">Anime icons created by Freepik - Flaticon</a>
       </footer>
     </main>
   )
-}
+} 
