@@ -1,120 +1,101 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [showResend, setShowResend] = useState(false);
-  const [emailToResend, setEmailToResend] = useState<string | null>(null);
-  const [resendStatus, setResendStatus] = useState('');
-  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [showResend, setShowResend] = useState(false)
+  const [emailToResend, setEmailToResend] = useState<string | null>(null)
+  const [resendStatus, setResendStatus] = useState('')
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent page reload
-    setErrorMsg('');
-    setShowResend(false);
+    e.preventDefault()
+    setErrorMsg('')
+    setShowResend(false)
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
-    // Check for specific unconfirmed email error first
     if (error) {
-
-      if (error.message.includes('Email not confirmed') || error.message.includes('user is not confirmed')) {
-        setEmailToResend(email);
-        setShowResend(true);
-        setErrorMsg(
-          'Please confirm your email before logging in. Check your inbox or spam folder.'
-        );
+      if (error.message.includes('Email not confirmed')) {
+        setEmailToResend(email)
+        setShowResend(true)
+        setErrorMsg('Please confirm your email before logging in.')
       } else {
-        // Handle other general login errors
-        setErrorMsg(error.message);
+        setErrorMsg(error.message)
       }
-      return;
+      return
     }
 
-    const session = data?.session;
-
+    const session = data?.session
     if (!session?.user?.email_confirmed_at) {
-        await supabase.auth.signOut();
-        setEmailToResend(email);
-        setShowResend(true);
-        setErrorMsg(
-          'Please confirm your email before logging in. Check your inbox or spam folder.'
-        );
-        return;
+      await supabase.auth.signOut()
+      setEmailToResend(email)
+      setShowResend(true)
+      setErrorMsg('Please confirm your email before logging in.')
+      return
     }
 
-    // Email is confirmed, allow login
-    router.push('/dashboard');
-  };
+    router.push('/dashboard')
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
-        <form className="flex flex-col gap-4" onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            className="border p-2 rounded"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="border p-2 rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded cursor-pointer"
-          >
-            Log In
-          </button>
-        </form>
-        {errorMsg && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mt-2 text-sm">
-            {errorMsg}
-          </div>
-        )}
+    <div className="min-h-screen bg-[#1D1D1F] flex flex-col justify-center items-center text-[#F5EDF7]">
+      <Link href="/" className="mb-6">
+        <Image src="/av_logo.png" alt="Anivex Logo" width={100} height={100} />
+      </Link>
+
+      <h1 className="text-2xl font-bold mb-2 font-orbitron">Welcome Back</h1>
+      <p className="mb-6 text-sm text-[#FF5DA2]">Step into the pulse of anime.</p>
+
+      <form onSubmit={handleLogin} className="bg-[#2f2f31] p-6 rounded-lg shadow-md w-full max-w-sm space-y-4 border border-[#6B4CA0]">
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full px-4 py-2 rounded bg-[#1D1D1F] border border-[#2FFFE2] focus:outline-none"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full px-4 py-2 rounded bg-[#1D1D1F] border border-[#2FFFE2] focus:outline-none"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button className="w-full bg-[#FF5DA2] text-black py-2 rounded hover:bg-pink-400 transition font-semibold">
+          Log In
+        </button>
+
+        {errorMsg && <div className="text-red-400 text-sm">{errorMsg}</div>}
 
         {showResend && (
-          <div className="text-center mt-4">
+          <div className="text-center text-sm mt-2">
             <button
               type="button"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+              className="text-[#2FFFE2] underline"
               onClick={async () => {
-                setResendStatus('');
-                const { error } = await supabase.auth.resend({
-                  type: 'signup',
-                  email: emailToResend!,
-                });
-
-                if (error) {
-                  setResendStatus('Failed to resend confirmation email. Try again.');
-                } else {
-                  setResendStatus('Confirmation email has been resent!');
-                }
+                setResendStatus('')
+                const { error } = await supabase.auth.resend({ type: 'signup', email: emailToResend! })
+                setResendStatus(error ? 'Failed to resend.' : 'Confirmation email sent!')
               }}
             >
               Resend Confirmation Email
             </button>
-
-            {resendStatus && (
-              <p className="text-sm mt-2 text-gray-700">{resendStatus}</p>
-            )}
+            {resendStatus && <p className="mt-1">{resendStatus}</p>}
           </div>
         )}
-      </div>
+      </form>
+
+      <p className="mt-4 text-sm">
+        Don&apos;t have an account? <Link href="/signup" className="text-[#2FFFE2] underline">Sign Up</Link>
+      </p>
     </div>
-  );
+  )
 }

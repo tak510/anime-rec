@@ -1,42 +1,37 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 export function useAuth() {
-  const [user, setUser] = useState<null | string>(null)
+  const [user, setUser] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
     const checkSession = async () => {
-        const { data, error } = await supabase.auth.getSession()
+      const { data, error } = await supabase.auth.getSession()
 
-        if (error || !data.session) {
-        router.push('/login')
-        } else {
+      if (!error && data.session) {
         setUser(data.session.user.email ?? null)
-        }
+      }
 
-        setLoading(false)
+      setLoading(false)
     }
 
     checkSession()
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (!session) {
-            setUser(null)
-            router.push('/login')
-        } else {
-            setUser(session.user.email ?? null)
-        }
+      if (session) {
+        setUser(session.user.email ?? null)
+      } else {
+        setUser(null)
+      }
     })
 
     return () => {
-        listener?.subscription.unsubscribe()
+      listener?.subscription.unsubscribe()
     }
-    }, [router])
+  }, [])
 
   return { user, loading }
 }

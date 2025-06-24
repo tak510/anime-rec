@@ -48,8 +48,9 @@ export default function ProfileDropdown() {
   }, [])
 
   const handleLogout = async () => {
+    localStorage.setItem('logout', 'true')
     const { error } = await supabase.auth.signOut()
-    if (!error) router.push('/login')
+    if (!error) router.push('/')
   }
 
   const goTo = (path: string) => {
@@ -65,7 +66,7 @@ export default function ProfileDropdown() {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="
-          inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold
+          inline-flex items-center justify-center px-4 py-2 rounded-lg cursor-pointer text-sm font-semibold
           bg-[#6B4CA0] text-[#F5EDF7] transition-all duration-300 ease-in-out
           hover:bg-[#2FFFE2] hover:text-[#1D1D1F] hover:shadow-md hover:shadow-[#2FFFE2]/50
           border border-[#6B4CA0] hover:border-[#2FFFE2]
@@ -124,16 +125,18 @@ export default function ProfileDropdown() {
             ))}
           </div>
           <div className="py-1">
-            <button
-              onClick={handleLogout}
-              className="
-                block w-full text-left px-4 py-2 text-sm text-[#F5EDF7] cursor-pointer
-                hover:bg-[#FF5DA2] hover:text-[#1D1D1F]
-                transition-colors duration-200 rounded-md mx-2
-              "
-            >
-              Sign out
-            </button>
+            <div className ="pr-4">
+              <button
+                onClick={handleLogout}
+                className="
+                  block w-full text-left px-4 py-2 text-sm text-[#F5EDF7] cursor-pointer
+                  hover:bg-[#FF5DA2] hover:text-[#1D1D1F]
+                  transition-colors duration-200 rounded-md mx-2
+                "
+              >
+                Sign out
+              </button>
+            </div>
           </div>
         </div>
       )}
