@@ -1,67 +1,60 @@
+'use client'
+
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { fetchPopularAnime } from '@/lib/anilist'
 
-interface JikanAnime {
-  mal_id: number
-  title: string
-  synopsis: string
-  images: { jpg: { image_url: string } }
-  genres: { name: string }[]
+type Anime = {
+  id: number
+  title: { userPreferred: string }
+  coverImage: { large: string }
+  averageScore: number
+  genres: string[]
 }
 
-async function fetchTopAnime(): Promise<JikanAnime[]> {
-  const res = await fetch('https://api.jikan.moe/v4/top/anime', {
-    next: { revalidate: 60 * 60 } // cache for 1 hour
-  })
-  if (!res.ok) throw new Error('Failed to fetch anime')
-  const json = await res.json()
-  return json.data
-}
+export default function PopularPage() {
+  const [animeList, setAnimeList] = useState<Anime[]>([])
 
-export default async function HomePage() {
-  let animeList: JikanAnime[] = []
+  useEffect(() => {
+    fetchPopularAnime(1, 20).then(setAnimeList)
+  }, [])
 
-  try {
-    animeList = await fetchTopAnime()
-  } catch (err) {
-    return <div>Error loading anime: {String(err)}</div>
-  }
-
-  if (animeList.length === 0) {
-    return <div>No anime found.</div>
-  }
+  if (animeList.length === 0) return <p className="pt-20 text-center text-gray-400">Loading popular anime...</p>
 
   return (
-    <>
-    <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Popular:</h1>
+    <main className="bg-[#1D1D1F] text-[#F5EDF7] min-h-screen px-4 md:px-12 py-10 font-inter">
+      <h1 className="text-4xl font-orbitron text-center mb-10 text-[#FF5DA2]">Popular Anime</h1>
 
-      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {animeList.map((anime) => (
-          <li key={anime.mal_id} className="border rounded-lg shadow-lg overflow-hidden">
-            <Image
-              src={anime.images.jpg.image_url}
-              alt={anime.title}
-              width={400}
-              height={225}
-              className="w-full object-cover"
-            />
-            <div className="p-4">
-              <h2 className="text-xl font-semibold">{anime.title}</h2>
-              <p className="text-sm text-gray-600">
-                {anime.synopsis?.slice(0, 120)}...
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {anime.genres.slice(0, 3).map((g) => (
-                  <span key={g.name} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                    {g.name}
-                  </span>
-                ))}
+      {/* Top 10 carousel */}
+      <section className="mb-16">
+        <h2 className="text-2xl font-bold mb-6 text-[#2FFFE2]">Top 10</h2>
+        <div className="flex overflow-x-auto space-x-6 pb-4">
+          {animeList.slice(0, 10).map((anime, idx) => (
+            <div key={anime.id} className="min-w-[200px] bg-[#2f2f31] rounded-lg overflow-hidden border border-[#FF5DA2]">
+              <Image src={anime.coverImage.large} alt={anime.title.userPreferred} width={200} height={300} className="object-cover" />
+              <div className="p-3">
+                <p className="text-lg font-semibold text-[#FF5DA2]">{idx + 1}. {anime.title.userPreferred}</p>
+                <p className="text-sm text-[#2FFFE2]">⭐ {anime.averageScore / 10}</p>
               </div>
             </div>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      </section>
+
+      {/* Full grid */}
+      <section>
+        <h2 className="text-2xl font-bold mb-6 text-[#2FFFE2]">All Popular Anime</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          {animeList.map(anime => (
+            <div key={anime.id} className="bg-[#2f2f31] rounded-lg overflow-hidden border border-[#6B4CA0] hover:scale-105 transition">
+              <Image src={anime.coverImage.large} alt={anime.title.userPreferred} width={300} height={400} className="object-cover" />
+              <div className="p-3">
+                <h3 className="text-sm font-semibold">{anime.title.userPreferred}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
-    </>
   )
 }
