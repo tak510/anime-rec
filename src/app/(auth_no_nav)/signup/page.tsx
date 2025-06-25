@@ -62,15 +62,17 @@ export default function SignUpPage() {
             />
           </div>
 
-          <p className="text-sm text-[#F5EDF7] mt-1">
-            🔒 Password must contain at least:
-            <ul className="list-disc list-inside pl-2 text-xs text-[#FF5DA2]">
-              <li>12 characters</li>
-              <li>1 capital letter</li>
-              <li>1 number</li>
-              <li>1 special character</li>
-            </ul>
-          </p>
+          <div>
+            <p className="text-sm text-[#F5EDF7] mt-1">
+              🔒 Password must contain at least:
+              <ul className="list-disc list-inside pl-2 text-xs text-[#FF5DA2]">
+                <li>12 characters</li>
+                <li>1 capital letter</li>
+                <li>1 number</li>
+                <li>1 special character</li>
+              </ul>
+            </p>
+          </div>
 
           <button
             type="submit"

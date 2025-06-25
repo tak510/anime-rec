@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Head from 'next/head'
 import Navbar from './components/Navbar'
+import Image from 'next/image'
 
 export default function LandingPage() {
   return (
@@ -14,20 +15,53 @@ export default function LandingPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="text-center py-20 bg-gradient-to-r from-[#6B4CA0] to-[#FF5DA2] text-[#F5EDF7]">
-        <h2 className="text-4xl md:text-6xl font-orbitron font-bold drop-shadow-lg">
-          Anime. Unlocked.
-        </h2>
-        <p className="mt-4 text-lg max-w-xl mx-auto font-inter">
-          Discover, rate, and explore anime tailored to your taste. Join a community driven by passion and powered by smart recommendations.
-        </p>
-        <div className="mt-8 flex justify-center space-x-4">
-          <Link href="/signup" className="bg-[#2FFFE2] text-[#1D1D1F] px-6 py-3 font-semibold rounded hover:scale-105 transition">
-            Get Started
-          </Link>
-          <Link href="/popular" className="border border-[#2FFFE2] text-[#2FFFE2] px-6 py-3 font-semibold rounded hover:bg-[#2FFFE2] hover:text-[#1D1D1F] transition">
-            Browse Anime
-          </Link>
+      <section className="relative py-20 bg-gradient-to-r from-[#6B4CA0] to-[#FF5DA2] text-[#F5EDF7] overflow-hidden">
+        {/* Left Mascot */}
+        <div className="absolute left-8 md:left-16 bottom-0 h-64 md:h-80 lg:h-[24rem] w-40 md:w-48 lg:w-64 z-10">
+          <Image
+            src="/av_mascot_female.png"
+            alt="Mascot Left"
+            fill
+            className="object-contain"
+            sizes="(min-width: 768px) 20vw, 0"
+            priority
+          />
+        </div>
+
+        {/* Right Mascot */}
+        <div className="absolute right-8 md:right-16 bottom-0 h-64 md:h-80 lg:h-[24rem] w-40 md:w-48 lg:w-64 z-10">
+          <Image
+            src="/av_mascot_male.png"
+            alt="Mascot Right"
+            fill
+            className="object-contain"
+            sizes="(min-width: 768px) 20vw, 0"
+            priority
+          />
+        </div>
+
+        {/* Main Hero Content */}
+        <div className="relative z-20 text-center px-4">
+          <h2 className="text-4xl md:text-6xl font-orbitron font-bold drop-shadow-lg">
+            Anime. Unlocked.
+          </h2>
+          <p className="mt-4 text-lg max-w-xl mx-auto font-inter">
+            Discover, rate, and explore anime tailored to your taste. Join a community driven by passion and powered by smart recommendations.
+          </p>
+          <div className="mt-8 flex justify-center space-x-4">
+            <Link
+              href="/signup"
+              className="bg-[#2FFFE2] text-[#1D1D1F] px-6 py-3 font-semibold rounded hover:scale-105 transition"
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/popular"
+              className="border border-[#2FFFE2] text-[#2FFFE2] px-6 py-3 font-semibold rounded hover:bg-[#2FFFE2] hover:text-[#1D1D1F] transition"
+            >
+              Browse Anime
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -55,5 +89,5 @@ export default function LandingPage() {
         &copy; {new Date().getFullYear()} Anivex. Built by an anime lover, for anime lovers. Icon: <a href="https://www.flaticon.com/free-icons/anime" title="anime icons">Anime icons created by Freepik - Flaticon</a>
       </footer>
     </main>
-  )
-} 
+  );
+}
