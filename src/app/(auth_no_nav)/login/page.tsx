@@ -79,7 +79,7 @@ export default function LoginPage() {
           <div className="text-center text-sm mt-2">
             <button
               type="button"
-              className="text-[#2FFFE2] underline"
+              className="text-[#2FFFE2] underline cursor-pointer"
               onClick={async () => {
                 setResendStatus('')
                 const { error } = await supabase.auth.resend({ type: 'signup', email: emailToResend! })

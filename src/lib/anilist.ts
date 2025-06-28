@@ -8,6 +8,7 @@ export async function fetchPopularAnime(page = 1, perPage = 20) {
           coverImage { large }
           averageScore
           genres
+          description
         }
       }
     }
@@ -25,5 +26,6 @@ export async function fetchPopularAnime(page = 1, perPage = 20) {
     coverImage: { large: string };
     averageScore: number;
     genres: string[];
+    description: string;
   }>
 }

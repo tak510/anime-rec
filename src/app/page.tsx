@@ -79,7 +79,7 @@ export default function LandingPage() {
           </div>
           <div className="bg-[#2f2f31] p-6 rounded-lg border border-[#6B4CA0] hover:shadow-violet-500/20 hover:shadow-lg transition">
             <h4 className="text-xl font-orbitron text-[#6B4CA0] mb-2">Your Anime Hub</h4>
-            <p className="font-inter text-sm">Profile, preferences, discussions, and collections — all in one sleek, futuristic platform.</p>
+            <p className="font-inter text-sm">Profile, preferences, and collections — all in one sleek, futuristic platform.</p>
           </div>
         </div>
       </section>
