@@ -10,7 +10,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className="flex items-center justify-between px-6 py-4 bg-[#1D1D1F] text-[#F5EDF7] shadow-lg relative z-10"
+      className="flex items-center justify-between px-6 py-4 bg-[#1D1D1F] text-[#F5EDF7] shadow-lg relative z-50"
       style={{ fontFamily: "'Orbitron', sans-serif" }}
     >
       {/* Logo + Site Title */}

@@ -101,7 +101,7 @@ export default function ProfileDropdown() {
           className="
             absolute right-0 mt-2 w-56 origin-top-right bg-[#1D1D1F] border border-[#6B4CA0]
             divide-y divide-[#6B4CA0] rounded-md shadow-lg ring-1 ring-black ring-opacity-5
-            animate-fade-in-scale z-20
+            animate-fade-in-scale z-9999
           "
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
