@@ -1,20 +1,19 @@
 'use client'
 
 import ProtectedRoute from '@/app/components/ProtectedRoute'
+import WatchlistSection from './components/WatchlistSection'
+import WatchedSection from './components/WatchedSection'
 
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen p-10 bg-[#1D1D1F] text-[#F5EDF7] font-inter">
-        <h1 className="text-3xl font-bold mb-4">Welcome to Your Dashboard</h1>
-        <p className="text-lg">This is your personal space. Here’s where you’ll see your watch history, preferences, and more.</p>
-
-        <div className="mt-8 p-6 border border-[#2FFFE2] rounded bg-[#2f2f31]">
-          <p className="text-sm text-gray-300">
-            Dashboard features under construction.
-          </p>
+      <main className="min-h-screen bg-[#1D1D1F] text-[#F5EDF7] px-4 py-10">
+        <h1 className="text-4xl font-orbitron text-center mb-10">Your Anime Dashboard</h1>
+        <div className="grid gap-12">
+          <WatchlistSection />
+          <WatchedSection />
         </div>
-      </div>
+      </main>
     </ProtectedRoute>
   )
 }
