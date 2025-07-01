@@ -3,20 +3,14 @@
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { fetchPopularAnime } from '@/lib/anilist'
+import { Anime } from '@/lib/types'
 
-type Anime = {
-  id: number
-  title: { userPreferred: string }
-  coverImage: { large: string }
-  averageScore: number
-  genres: string[]
-}
 
 export default function PopularPage() {
   const [animeList, setAnimeList] = useState<Anime[]>([])
 
   useEffect(() => {
-    fetchPopularAnime(1, 100).then(setAnimeList)
+    fetchPopularAnime(100).then(setAnimeList)
   }, [])
 
   if (animeList.length === 0) return <p className="pt-20 text-center text-gray-400">Loading popular anime...</p>
@@ -27,7 +21,7 @@ export default function PopularPage() {
 
       {/* Top 10 carousel */}
       <section className="mb-16">
-        <h2 className="text-2xl font-bold mb-6 text-[#2FFFE2]">Top 10</h2>
+        <h2 className="text-2xl font-bold mb-6 text-[#2FFFE2]">Current Most Popular Anime</h2>
         <div className="flex overflow-x-auto space-x-6 pl-4 pb-4 pt-4">
           {animeList.slice(0, 10).map((anime, idx) => (
             <div
@@ -65,7 +59,7 @@ export default function PopularPage() {
 
       {/* Full grid */}
       <section>
-        <h2 className="text-2xl font-bold mb-6 text-[#2FFFE2]">All Popular Anime</h2>
+        <h2 className="text-2xl font-bold mb-6 text-[#2FFFE2]">Top 100 Most Popular Anime</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {animeList.map((anime) => (
             <div
