@@ -80,7 +80,7 @@ export async function fetchAnimeSearch(search: string) {
   return data.data.Page.media
 }
 
-export async function fetchAnimeByIds(ids: number[]) {
+export async function fetchAnimeByIds(ids: number[]): Promise<Record<number, Anime>> {
   const query = `
     query ($ids: [Int]) {
       Page(perPage: 50) {
@@ -92,14 +92,21 @@ export async function fetchAnimeByIds(ids: number[]) {
         }
       }
     }
-  `;
+  `
 
   const response = await fetch('https://graphql.anilist.co', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables: { ids } }),
-  });
+  })
 
-  const json = await response.json();
-  return json.data.Page.media;
+  const json = await response.json()
+  const animeList: Anime[] = json.data.Page.media
+
+  const animeMap: Record<number, Anime> = {}
+  animeList.forEach((anime) => {
+    animeMap[anime.id] = anime
+  })
+
+  return animeMap
 }

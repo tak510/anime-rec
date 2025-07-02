@@ -13,4 +13,5 @@ export type WatchedAnime = {
   imageUrl: string
   rating: number
   watchedAt: string
+  anilistScore: number
 }
