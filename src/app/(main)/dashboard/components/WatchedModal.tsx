@@ -16,22 +16,55 @@ type AnimeSearchResult = {
   averageScore?: number
 }
 
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 export default function WatchedModal({ onClose }: WatchedModalProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<AnimeSearchResult[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [adding, setAdding] = useState<number | null>(null)
 
-  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setQuery(value)
+  const debouncedQuery = useDebounce(query, 500)
 
-    if (value.trim().length > 1) {
-      const animeList: AnimeSearchResult[] = await fetchAnimeSearch(value)
-      setResults(animeList)
-    } else {
-      setResults([])
+  useEffect(() => {
+    const search = async () => {
+      if (debouncedQuery.trim().length < 2) {
+        setResults([])
+        setError(null)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const animeList: AnimeSearchResult[] = await fetchAnimeSearch(debouncedQuery)
+        setResults(animeList)
+        if (animeList.length === 0) {
+          setError('No anime found.')
+        }
+      } catch (err) {
+        console.error('Search failed:', err)
+        setError('Failed to fetch results.')
+        setResults([])
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+
+    search()
+  }, [debouncedQuery])
 
   const handleAdd = async (anime: AnimeSearchResult) => {
     try {
@@ -44,21 +77,18 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
       setQuery('')
       setResults([])
     } catch (err) {
-    const errorMsg =
-        err instanceof Error ? err.message : 'An unknown error occurred.'
-    alert(`❌ Failed to add anime: ${errorMsg}`)
-    console.log(errorMsg)
+      const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred.'
+      alert(`❌ Failed to add anime: ${errorMsg}`)
+      console.error(errorMsg)
+    } finally {
+      setAdding(null)
     }
-    finally {
-        setAdding(null)
-        }
-    }
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
@@ -79,12 +109,15 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
           type="text"
           placeholder="Search anime..."
           value={query}
-          onChange={handleSearch}
+          onChange={(e) => setQuery(e.target.value)}
           className="w-full p-3 rounded bg-[#2f2f31] text-white border border-[#2FFFE2] mb-4"
+          disabled={loading}
         />
 
         <ul className="space-y-2 max-h-64 overflow-y-auto pr-2">
-          {results.map((anime) => (
+          {loading && <p className="text-sm text-gray-400 px-2">Searching...</p>}
+          {error && <p className="text-sm text-red-400 px-2">{error}</p>}
+          {!loading && !error && results.map((anime) => (
             <li
               key={anime.id}
               className="flex items-center justify-between bg-[#2f2f31] p-3 rounded hover:bg-[#2FFFE2]/10 transition"

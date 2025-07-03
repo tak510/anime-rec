@@ -60,6 +60,7 @@ export async function getWatchedAnime(): Promise<WatchedAnime[]> {
       rating: entry.rating ?? 0,
       watchedAt: entry.created_at ?? '',
       anilistScore: anime.averageScore ?? 0,
+      description: anime.description ?? 'No description',
     }];
   });
 

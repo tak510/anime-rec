@@ -89,6 +89,7 @@ export async function fetchAnimeByIds(ids: number[]): Promise<Record<number, Ani
           title { userPreferred }
           coverImage { large }
           averageScore
+          description(asHtml: false)
         }
       }
     }

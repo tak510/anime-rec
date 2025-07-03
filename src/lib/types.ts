@@ -14,4 +14,5 @@ export type WatchedAnime = {
   rating: number
   watchedAt: string
   anilistScore: number
+  description: string
 }

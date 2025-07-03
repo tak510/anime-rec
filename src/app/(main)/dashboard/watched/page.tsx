@@ -5,10 +5,12 @@ import { getWatchedAnime } from '@/lib/supabase'
 import ProtectedRoute from '@/app/components/ProtectedRoute'
 import Image from 'next/image'
 import { WatchedAnime } from '@/lib/types'
+import WatchedAnimeModal from '@/app/(main)/dashboard/components/WatchedAnimeModal'
 
 export default function WatchedPage() {
   const [watchedList, setWatchedList] = useState<WatchedAnime[]>([])
   const [sortOption, setSortOption] = useState<'recent' | 'rating' | 'popularity'>('recent')
+  const [selectedAnime, setSelectedAnime] = useState<WatchedAnime | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -24,7 +26,7 @@ export default function WatchedPage() {
     } else if (sortOption === 'rating') {
       return b.rating - a.rating
     } else if (sortOption === 'popularity') {
-      return b.anilistScore - a.anilistScore // Fallback to 0 if undefined
+      return b.anilistScore - a.anilistScore
     }
     return 0
   })
@@ -52,7 +54,8 @@ export default function WatchedPage() {
             {sortedList.map((anime) => (
               <div
                 key={anime.id}
-                className="bg-[#2f2f31] p-3 rounded-md shadow hover:scale-[1.02] transition duration-200"
+                onClick={() => setSelectedAnime(anime)}
+                className="bg-[#2f2f31] p-3 rounded-md shadow hover:scale-[1.02] cursor-pointer transition duration-200"
               >
                 <div className="relative w-full h-[270px] mb-2 rounded overflow-hidden">
                   <Image
@@ -64,11 +67,18 @@ export default function WatchedPage() {
                   />
                 </div>
                 <h3 className="text-md font-semibold truncate">{anime.title}</h3>
-                <p className="text-sm text-gray-400">⭐ {anime.rating}/100</p>
-                <p className="text-sm text-[#2FFFE2]">AniList Score: {anime.anilistScore}/100</p> 
+                <p className="text-sm text-gray-400">⭐ Your Rating: <span className='text-[#FF5DA2]'>{anime.rating}</span>/<span className='text-[#FF5DA2]'>10</span></p>
+                <p className="text-sm text-[#2FFFE2]">AniList Score: {anime.anilistScore / 10}/10</p>
               </div>
             ))}
           </div>
+        )}
+
+        {selectedAnime && (
+          <WatchedAnimeModal
+            anime={selectedAnime}
+            onClose={() => setSelectedAnime(null)}
+          />
         )}
       </main>
     </ProtectedRoute>
