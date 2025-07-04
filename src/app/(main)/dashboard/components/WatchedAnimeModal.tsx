@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import { WatchedAnime } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
@@ -8,52 +8,48 @@ import { supabase } from '@/lib/supabase'
 type WatchedAnimeModalProps = {
   anime: WatchedAnime
   onClose: () => void
+  onSave?: (newRating: number) => Promise<void>
 }
 
 export default function WatchedAnimeModal({
   anime,
   onClose,
+  onSave,
 }: WatchedAnimeModalProps) {
-  const [newRating, setNewRating] = useState<number>(anime.rating)
-  const [userId, setUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const getUserId = async () => {
-      const { data, error } = await supabase.auth.getUser()
-      if (!error && data.user) {
-        setUserId(data.user.id)
-      }
-    }
-    getUserId()
-  }, [])
+  const [newRating, setNewRating] = useState<string>(anime.rating.toString())
 
   const handleUpdateRating = async () => {
-    if (!userId) return
-    try {
-      await supabase
-        .from('anime_entries')
-        .update({ rating: newRating })
-        .eq('user_id', userId)
-        .eq('anilist_id', anime.id)
-
-      alert('✅ Rating updated!')
-      onClose()
-    } catch (err) {
-      alert('❌ Failed to update rating.')
-      console.error(err)
-    }
+  const parsedRating = Number(newRating)
+  if (parsedRating < 1 || parsedRating > 10) {
+    alert('Rating must be between 1 and 10.')
+    return
   }
 
+  try {
+    if (onSave) {
+      await onSave(parsedRating)
+    }
+
+    alert('✅ Rating updated!')
+    onClose()
+  } catch (err) {
+    alert('❌ Failed to update rating.')
+    console.error(err)
+  }
+}
+
   const handleRemove = async () => {
-    if (!userId) return
-    const confirmDelete = window.confirm('Are you sure you want to remove this anime from your watched list?')
-    if (!confirmDelete) return
+    const confirmRemove = window.confirm(
+      'Are you sure you want to remove this anime from your watched list?'
+    )
+    if (!confirmRemove) return
 
     try {
+      const { data: userData } = await supabase.auth.getUser()
       await supabase
         .from('anime_entries')
         .delete()
-        .eq('user_id', userId)
+        .eq('user_id', userData.user?.id)
         .eq('anilist_id', anime.id)
 
       alert('❌ Anime removed from your watched list.')
@@ -63,6 +59,9 @@ export default function WatchedAnimeModal({
       console.error(err)
     }
   }
+
+  // Clean up basic HTML tags
+  const cleanDescription = anime.description?.replace(/<br\s*\/?>/gi, '\n').replace(/<\/?[^>]+(>|$)/g, '') || 'No description available.'
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
@@ -91,23 +90,33 @@ export default function WatchedAnimeModal({
             <h2 className="text-2xl font-bold text-[#FF5DA2] font-orbitron mb-2">
               {anime.title}
             </h2>
-            <p className="text-sm text-gray-300 leading-relaxed max-h-[140px] overflow-y-auto pr-1 mb-4">
-              {anime.description || 'No description available.'}
+            <p className="text-sm text-gray-300 leading-relaxed max-h-[140px] overflow-y-auto pr-1 whitespace-pre-wrap mb-4">
+              {cleanDescription}
             </p>
 
-            <div className="mb-4">
+            <div className="mt-4 mb-4">
               <label className="block text-sm font-medium mb-1">Your Rating:</label>
-              <input
-                type="number"
-                value={newRating}
-                onChange={(e) => setNewRating(Number(e.target.value))}
-                min={0}
-                max={100}
-                className="w-24 p-2 rounded bg-[#2f2f31] border border-[#2FFFE2] text-white"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={newRating}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    // Allow empty value for typing
+                    if (value === '' || (/^\d+$/.test(value) && +value <= 10)) {
+                      setNewRating(value)
+                    }
+                  }}
+                  placeholder="e.g. 8"
+                  className="w-20 p-2 rounded bg-[#2f2f31] border border-[#2FFFE2] text-white text-center"
+                />
+                <span className="text-sm text-gray-400">/ 10</span>
+              </div>
               <button
                 onClick={handleUpdateRating}
-                className="ml-4 px-4 py-2 bg-[#FF5DA2] text-white rounded hover:opacity-90 transition"
+                className="mt-3 px-4 py-2 bg-[#FF5DA2] text-white rounded hover:opacity-90 transition cursor-pointer"
               >
                 Update Rating
               </button>
@@ -115,7 +124,7 @@ export default function WatchedAnimeModal({
 
             <button
               onClick={handleRemove}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
             >
               Remove from Watched List
             </button>

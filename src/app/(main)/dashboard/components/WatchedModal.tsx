@@ -98,7 +98,7 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
       <div className="bg-[#1D1D1F] text-white p-6 rounded-lg w-full max-w-xl shadow-xl relative">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-white text-xl hover:opacity-80"
+          className="absolute top-3 right-3 text-white text-xl hover:opacity-80 cursor-pointer"
         >
           ×
         </button>
@@ -150,7 +150,7 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
         </ul>
 
         <button
-          className="mt-6 w-full bg-[#FF5DA2] text-white font-semibold py-2 rounded hover:opacity-90 transition"
+          className="mt-6 w-full bg-[#FF5DA2] text-white font-semibold py-2 rounded hover:opacity-90 transition cursor-pointer"
           onClick={() => {
             onClose()
             window.location.href = '/dashboard/watched'
