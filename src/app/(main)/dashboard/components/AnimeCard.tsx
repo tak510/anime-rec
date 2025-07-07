@@ -5,11 +5,14 @@ type AnimeCardProps = {
   title: string
   imageUrl: string
   rating?: number
+  onClick?: () => void
 }
 
-export default function AnimeCard({ id, title, imageUrl, rating }: AnimeCardProps) {
+export default function AnimeCard({ id, title, imageUrl, rating, onClick }: AnimeCardProps) {
   return (
-    <div className="bg-[#2f2f31] rounded overflow-hidden shadow-md hover:shadow-lg transition border border-[#2FFFE2]">
+    <div
+      onClick={onClick} 
+      className="bg-[#2f2f31] p-3 rounded-md shadow hover:scale-[1.02] cursor-pointer transition duration-200">
       <Image
         src={imageUrl}
         alt={title+id}

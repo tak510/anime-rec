@@ -11,11 +11,14 @@ export default function WatchedPage() {
   const [watchedList, setWatchedList] = useState<WatchedAnime[]>([])
   const [sortOption, setSortOption] = useState<'recent' | 'rating' | 'popularity'>('recent')
   const [selectedAnime, setSelectedAnime] = useState<WatchedAnime | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true)
       const data = await getWatchedAnime()
       setWatchedList(data)
+      setLoading(false)
     }
     fetchData()
   }, [])
@@ -30,6 +33,13 @@ export default function WatchedPage() {
     }
     return 0
   })
+
+  const refreshWatchedList = async () => {
+    setLoading(true)
+    const data = await getWatchedAnime()
+    setWatchedList(data)
+    setLoading(false)
+  }
 
   return (
     <ProtectedRoute>
@@ -47,7 +57,9 @@ export default function WatchedPage() {
           </select>
         </div>
 
-        {sortedList.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-400 text-center mt-10">Loading your watched anime...</p>
+        ) : sortedList.length === 0 ? (
           <p className="text-gray-400 text-center mt-10">No anime in your watched list yet.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
@@ -67,8 +79,13 @@ export default function WatchedPage() {
                   />
                 </div>
                 <h3 className="text-md font-semibold truncate">{anime.title}</h3>
-                <p className="text-sm text-gray-400">⭐ Your Rating: <span className='text-[#FF5DA2]'>{anime.rating}</span>/<span className='text-[#FF5DA2]'>10</span></p>
-                <p className="text-sm text-[#2FFFE2]">AniList Score: {anime.anilistScore / 10}/10</p>
+                <p className="text-sm text-gray-400">
+                  ⭐ Your Rating: <span className="text-[#FF5DA2]">{anime.rating}</span>
+                  <span className="text-[#FF5DA2]"> / 10</span>
+                </p>
+                <p className="text-sm text-[#2FFFE2]">
+                  AniList Score: {anime.anilistScore / 10}/10
+                </p>
               </div>
             ))}
           </div>
@@ -78,6 +95,7 @@ export default function WatchedPage() {
           <WatchedAnimeModal
             anime={selectedAnime}
             onClose={() => setSelectedAnime(null)}
+            onUpdate={refreshWatchedList}
           />
         )}
       </main>

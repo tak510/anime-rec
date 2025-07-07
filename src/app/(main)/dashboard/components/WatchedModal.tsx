@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { fetchAnimeSearch } from '@/lib/anilist'
-import { addToWatched } from '@/lib/supabase'
+import { addToWatched, getWatchedAnime } from '@/lib/supabase'
 import Image from 'next/image'
 
 type WatchedModalProps = {
@@ -34,8 +34,30 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [adding, setAdding] = useState<number | null>(null)
+  const [watchedIds, setWatchedIds] = useState<number[]>([])
 
   const debouncedQuery = useDebounce(query, 500)
+
+  // Load watched anime IDs on mount
+  useEffect(() => {
+    const loadWatched = async () => {
+      try {
+        const watched = await getWatchedAnime()
+        setWatchedIds(watched.map((anime) => Number(anime.id)))
+      } catch (err) {
+        console.error('Failed to load watched anime:', err)
+      }
+    }
+
+    loadWatched()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
 
   useEffect(() => {
     const search = async () => {
@@ -67,6 +89,11 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
   }, [debouncedQuery])
 
   const handleAdd = async (anime: AnimeSearchResult) => {
+    if (watchedIds.includes(anime.id)) {
+      alert(`❌ You've already added "${anime.title.userPreferred}" to your watched list.`)
+      return
+    }
+
     try {
       setAdding(anime.id)
       await addToWatched({
@@ -76,6 +103,7 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
       alert(`✅ Added "${anime.title.userPreferred}" to your watched list.`)
       setQuery('')
       setResults([])
+      setWatchedIds((prev) => [...prev, anime.id]) // Add to local state to prevent instant re-add
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred.'
       alert(`❌ Failed to add anime: ${errorMsg}`)
@@ -84,14 +112,6 @@ export default function WatchedModal({ onClose }: WatchedModalProps) {
       setAdding(null)
     }
   }
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
