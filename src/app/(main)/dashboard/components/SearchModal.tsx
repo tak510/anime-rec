@@ -28,7 +28,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
-export default function WatchedModal({ onClose }: WatchedModalProps) {
+export default function SearchModal({ onClose }: WatchedModalProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<AnimeSearchResult[]>([])
   const [error, setError] = useState<string | null>(null)

@@ -84,7 +84,7 @@ export default function WatchedPage() {
                   <span className="text-[#FF5DA2]"> / 10</span>
                 </p>
                 <p className="text-sm text-[#2FFFE2]">
-                  AniList Score: {anime.anilistScore / 10}/10
+                  AniList Score: {anime.anilistScore / 10} / 10
                 </p>
               </div>
             ))}

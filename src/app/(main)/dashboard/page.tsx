@@ -18,6 +18,9 @@ export default function DashboardPage() {
       try {
         const data = await getWatchedAnime()
         setWatchedList(data)
+        data.sort((a,b) => {
+          return new Date(b.watchedAt).getTime() - new Date(a.watchedAt).getTime()
+        })
       } catch (err) {
         console.error('Failed to fetch watched anime:', err)
       } finally {

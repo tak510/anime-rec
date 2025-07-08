@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import AnimeCard from './AnimeCard'
 import { WatchedAnime } from '@/lib/types'
-import WatchedModal from './WatchedModal'
+import WatchedModal from './SearchModal'
 
 type WatchedSectionProps = {
   animeList: WatchedAnime[]
