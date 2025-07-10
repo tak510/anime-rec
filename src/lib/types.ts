@@ -16,3 +16,12 @@ export type WatchedAnime = {
   anilistScore: number
   description: string
 }
+
+export type WatchlistAnime = {
+  id: string
+  title: string
+  imageUrl: string
+  addedAt: string
+  anilistScore: number
+  description: string
+}

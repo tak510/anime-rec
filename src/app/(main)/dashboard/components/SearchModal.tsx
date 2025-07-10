@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import { fetchAnimeSearch } from '@/lib/anilist'
-import { addToWatched, getWatchedAnime } from '@/lib/supabase'
+import {
+  addToWatched,
+  addToWatchlist,
+  getWatchedAnime,
+  getWatchlistAnime,
+} from '@/lib/supabase'
 import Image from 'next/image'
 
-type WatchedModalProps = {
+type SearchModalProps = {
   onClose: () => void
+  mode: 'watched' | 'watchlist'
+  onAdded: () => void
 }
 
 type AnimeSearchResult = {
@@ -16,7 +23,6 @@ type AnimeSearchResult = {
   averageScore?: number
 }
 
-// Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value)
 
@@ -28,28 +34,27 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
-export default function SearchModal({ onClose }: WatchedModalProps) {
+export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<AnimeSearchResult[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [adding, setAdding] = useState<number | null>(null)
-  const [watchedIds, setWatchedIds] = useState<number[]>([])
+  const [existingIds, setExistingIds] = useState<number[]>([])
 
   const debouncedQuery = useDebounce(query, 500)
 
-  // Load watched anime IDs on mount
   useEffect(() => {
-    const loadWatched = async () => {
+    const loadExisting = async () => {
       try {
-        const watched = await getWatchedAnime()
-        setWatchedIds(watched.map((anime) => Number(anime.id)))
+        const list = mode === 'watched' ? await getWatchedAnime() : await getWatchlistAnime()
+        setExistingIds(list.map((anime) => Number(anime.id)))
       } catch (err) {
-        console.error('Failed to load watched anime:', err)
+        console.error(`Failed to load existing ${mode} anime:`, err)
       }
     }
 
-    loadWatched()
+    loadExisting()
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -57,7 +62,7 @@ export default function SearchModal({ onClose }: WatchedModalProps) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  }, [onClose, mode])
 
   useEffect(() => {
     const search = async () => {
@@ -71,7 +76,7 @@ export default function SearchModal({ onClose }: WatchedModalProps) {
       setError(null)
 
       try {
-        const animeList: AnimeSearchResult[] = await fetchAnimeSearch(debouncedQuery)
+        const animeList = await fetchAnimeSearch(debouncedQuery)
         setResults(animeList)
         if (animeList.length === 0) {
           setError('No anime found.')
@@ -89,25 +94,34 @@ export default function SearchModal({ onClose }: WatchedModalProps) {
   }, [debouncedQuery])
 
   const handleAdd = async (anime: AnimeSearchResult) => {
-    if (watchedIds.includes(anime.id)) {
-      alert(`❌ You've already added "${anime.title.userPreferred}" to your watched list.`)
+    if (existingIds.includes(anime.id)) {
+      alert(`❌ You've already added "${anime.title.userPreferred}" to your ${mode} list.`)
       return
     }
 
     try {
       setAdding(anime.id)
-      await addToWatched({
-        anilistId: anime.id,
-        rating: anime.averageScore ?? undefined,
-      })
-      alert(`✅ Added "${anime.title.userPreferred}" to your watched list.`)
-      setQuery('')
-      setResults([])
-      setWatchedIds((prev) => [...prev, anime.id]) // Add to local state to prevent instant re-add
+
+      if (mode === 'watched') {
+        await addToWatched({
+          anilistId: anime.id,
+          rating: anime.averageScore ?? undefined,
+        })
+      } else {
+        await addToWatchlist({
+          anilistId: anime.id,
+          rating: anime.averageScore ?? undefined,
+        })
+      }
+
+      alert(`✅ Added "${anime.title.userPreferred}" to your ${mode} list.`)
+
+      onAdded()
+      onClose()
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred.'
-      alert(`❌ Failed to add anime: ${errorMsg}`)
-      console.error(errorMsg)
+      const msg = err instanceof Error ? err.message : 'An unknown error occurred.'
+      alert(`❌ Failed to add anime: ${msg}`)
+      console.error(msg)
     } finally {
       setAdding(null)
     }
@@ -123,7 +137,7 @@ export default function SearchModal({ onClose }: WatchedModalProps) {
           ×
         </button>
 
-        <h2 className="text-2xl font-bold mb-4">Add to Watched List</h2>
+        <h2 className="text-2xl font-bold mb-4">Add to {mode === 'watched' ? 'Watched' : 'Watchlist'}</h2>
 
         <input
           type="text"
@@ -137,47 +151,38 @@ export default function SearchModal({ onClose }: WatchedModalProps) {
         <ul className="space-y-2 max-h-64 overflow-y-auto pr-2">
           {loading && <p className="text-sm text-gray-400 px-2">Searching...</p>}
           {error && <p className="text-sm text-red-400 px-2">{error}</p>}
-          {!loading && !error && results.map((anime) => (
-            <li
-              key={anime.id}
-              className="flex items-center justify-between bg-[#2f2f31] p-3 rounded hover:bg-[#2FFFE2]/10 transition"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative w-12 h-16 rounded overflow-hidden">
-                  <Image
-                    src={anime.coverImage.large}
-                    alt={anime.title.userPreferred}
-                    fill
-                    className="object-cover rounded"
-                    sizes="48px"
-                  />
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">{anime.title.userPreferred}</p>
-                  <p className="text-xs text-gray-400">Score: {anime.averageScore ?? 'N/A'}</p>
-                </div>
-              </div>
-
-              <button
-                disabled={adding === anime.id}
-                onClick={() => handleAdd(anime)}
-                className="bg-[#2FFFE2] text-black text-sm px-3 py-1 rounded hover:bg-opacity-80 transition disabled:opacity-50"
+          {!loading && !error &&
+            results.map((anime) => (
+              <li
+                key={anime.id}
+                className="flex items-center justify-between bg-[#2f2f31] p-3 rounded hover:bg-[#2FFFE2]/10 transition"
               >
-                {adding === anime.id ? 'Adding...' : 'Add'}
-              </button>
-            </li>
-          ))}
-        </ul>
+                <div className="flex items-center gap-3">
+                  <div className="relative w-12 h-16 rounded overflow-hidden">
+                    <Image
+                      src={anime.coverImage.large}
+                      alt={anime.title.userPreferred}
+                      fill
+                      className="object-cover rounded"
+                      sizes="48px"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">{anime.title.userPreferred}</p>
+                    <p className="text-xs text-gray-400">Score: {anime.averageScore ?? 'N/A'}</p>
+                  </div>
+                </div>
 
-        <button
-          className="mt-6 w-full bg-[#FF5DA2] text-white font-semibold py-2 rounded hover:opacity-90 transition cursor-pointer"
-          onClick={() => {
-            onClose()
-            window.location.href = '/dashboard/watched'
-          }}
-        >
-          View Full Watched List
-        </button>
+                <button
+                  disabled={adding === anime.id}
+                  onClick={() => handleAdd(anime)}
+                  className="bg-[#2FFFE2] text-black text-sm px-3 py-1 rounded hover:bg-opacity-80 transition disabled:opacity-50"
+                >
+                  {adding === anime.id ? 'Adding...' : 'Add'}
+                </button>
+              </li>
+            ))}
+        </ul>
       </div>
     </div>
   )
