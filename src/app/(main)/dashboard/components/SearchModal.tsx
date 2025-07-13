@@ -2,18 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { fetchAnimeSearch } from '@/lib/anilist'
-import {
-  addToWatched,
-  addToWatchlist,
-  getWatchedAnime,
-  getWatchlistAnime,
-} from '@/lib/supabase'
+import { addToWatched, addToWatchlist, getWatchedAnime, getWatchlistAnime } from '@/lib/supabase'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 type SearchModalProps = {
   onClose: () => void
   mode: 'watched' | 'watchlist'
-  onAdded: () => void
+  onAdded?: () => void
 }
 
 type AnimeSearchResult = {
@@ -23,6 +19,7 @@ type AnimeSearchResult = {
   averageScore?: number
 }
 
+// Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value)
 
@@ -42,15 +39,18 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
   const [adding, setAdding] = useState<number | null>(null)
   const [existingIds, setExistingIds] = useState<number[]>([])
 
+  const router = useRouter()
   const debouncedQuery = useDebounce(query, 500)
 
+  // Load existing anime list for duplicate prevention
   useEffect(() => {
     const loadExisting = async () => {
       try {
-        const list = mode === 'watched' ? await getWatchedAnime() : await getWatchlistAnime()
+        const list =
+          mode === 'watched' ? await getWatchedAnime() : await getWatchlistAnime()
         setExistingIds(list.map((anime) => Number(anime.id)))
       } catch (err) {
-        console.error(`Failed to load existing ${mode} anime:`, err)
+        console.error('Failed to load existing anime:', err)
       }
     }
 
@@ -64,6 +64,7 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose, mode])
 
+  // Search logic
   useEffect(() => {
     const search = async () => {
       if (debouncedQuery.trim().length < 2) {
@@ -76,7 +77,7 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
       setError(null)
 
       try {
-        const animeList = await fetchAnimeSearch(debouncedQuery)
+        const animeList: AnimeSearchResult[] = await fetchAnimeSearch(debouncedQuery)
         setResults(animeList)
         if (animeList.length === 0) {
           setError('No anime found.')
@@ -93,6 +94,7 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
     search()
   }, [debouncedQuery])
 
+  // Add handler
   const handleAdd = async (anime: AnimeSearchResult) => {
     if (existingIds.includes(anime.id)) {
       alert(`❌ You've already added "${anime.title.userPreferred}" to your ${mode} list.`)
@@ -115,17 +117,20 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
       }
 
       alert(`✅ Added "${anime.title.userPreferred}" to your ${mode} list.`)
-
-      onAdded()
-      onClose()
+      setQuery('')
+      setResults([])
+      setExistingIds((prev) => [...prev, anime.id])
+      if (onAdded) onAdded()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'An unknown error occurred.'
-      alert(`❌ Failed to add anime: ${msg}`)
-      console.error(msg)
+      const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred.'
+      alert(`❌ Failed to add anime: ${errorMsg}`)
+      console.error(errorMsg)
     } finally {
       setAdding(null)
     }
   }
+
+  const fullListPath = mode === 'watched' ? '/dashboard/watched' : '/dashboard/towatch'
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
@@ -137,7 +142,9 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
           ×
         </button>
 
-        <h2 className="text-2xl font-bold mb-4">Add to {mode === 'watched' ? 'Watched' : 'Watchlist'}</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          Add to {mode === 'watched' ? 'Watched' : 'Watchlist'}
+        </h2>
 
         <input
           type="text"
@@ -151,7 +158,8 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
         <ul className="space-y-2 max-h-64 overflow-y-auto pr-2">
           {loading && <p className="text-sm text-gray-400 px-2">Searching...</p>}
           {error && <p className="text-sm text-red-400 px-2">{error}</p>}
-          {!loading && !error &&
+          {!loading &&
+            !error &&
             results.map((anime) => (
               <li
                 key={anime.id}
@@ -168,8 +176,12 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
                     />
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium">{anime.title.userPreferred}</p>
-                    <p className="text-xs text-gray-400">Score: {anime.averageScore ?? 'N/A'}</p>
+                    <p className="text-white text-sm font-medium">
+                      {anime.title.userPreferred}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Score: {anime.averageScore ?? 'N/A'}
+                    </p>
                   </div>
                 </div>
 
@@ -183,6 +195,16 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
               </li>
             ))}
         </ul>
+
+        <button
+          className="mt-6 w-full bg-[#FF5DA2] text-white font-semibold py-2 rounded hover:opacity-90 transition cursor-pointer"
+          onClick={() => {
+            onClose()
+            router.push(fullListPath)
+          }}
+        >
+          View Full {mode === 'watched' ? 'Watched list' : 'Watchlist'}
+        </button>
       </div>
     </div>
   )

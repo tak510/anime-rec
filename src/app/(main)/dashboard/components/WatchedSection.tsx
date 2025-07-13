@@ -48,7 +48,7 @@ export default function WatchedSection({
 
             {/* Placeholder Card: always shown */}
             <div
-              className="bg-[#1d1d1f] border border-dashed border-[#2FFFE2] rounded-md flex flex-col items-center justify-center hover:opacity-90 hover:scale-[1.02] cursor-pointer transition p-4 text-center"
+              className="bg-[#1d1d1f] border border-dashed border-[#FF5DA2] rounded-md flex flex-col items-center justify-center hover:opacity-90 hover:scale-[1.02] cursor-pointer transition p-4 text-center"
               onClick={() => setShowModal(true)}
             >
               {animeList.length === 0 ? (
@@ -58,8 +58,8 @@ export default function WatchedSection({
                 </>
               ) : (
                 <>
-                  <span className="text-[#2FFFE2] font-semibold text-sm">+ Add More</span>
-                  <span className="text-[#2FFFE2] text-xs mt-1">or View All</span>
+                  <span className="text-[#FF5DA2] font-semibold text-sm">+ Add More</span>
+                  <span className="text-[#FF5DA2] text-xs mt-1">or View All</span>
                 </>
               )}
             </div>

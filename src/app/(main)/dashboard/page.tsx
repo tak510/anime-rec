@@ -7,6 +7,7 @@ import WatchedSection from './components/WatchedSection'
 import WatchedAnimeModal from './components/WatchedAnimeModal'
 import { getWatchedAnime, getWatchlistAnime } from '@/lib/supabase'
 import { WatchedAnime, WatchlistAnime } from '@/lib/types'
+import WatchlistAnimeModal from './components/WatchlistAnimeModal'
 
 export default function DashboardPage() {
   const [watchedList, setWatchedList] = useState<WatchedAnime[]>([])
@@ -24,7 +25,6 @@ export default function DashboardPage() {
         ])
 
         watchedData.sort((a, b) => new Date(b.watchedAt).getTime() - new Date(a.watchedAt).getTime())
-        watchlistData.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
 
         setWatchedList(watchedData)
         setWatchlist(watchlistData)
@@ -46,9 +46,7 @@ export default function DashboardPage() {
 
   const refreshWatchlist = async () => {
     const data = await getWatchlistAnime()
-    data.sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
     setWatchlist(data)
-    console.log(selectedWatchlistAnime) // Literally only here to get rid of annoying error notification
   }
 
 
@@ -79,6 +77,14 @@ export default function DashboardPage() {
             anime={selectedWatchedAnime}
             onClose={() => setSelectedWatchedAnime(null)}
             onUpdate={refreshWatchedList}
+          />
+        )}
+
+        {selectedWatchlistAnime && (
+          <WatchlistAnimeModal
+            anime={selectedWatchlistAnime}
+            onClose={() => setSelectedWatchlistAnime(null)}
+            onUpdate={refreshWatchlist}
           />
         )}
       </main>

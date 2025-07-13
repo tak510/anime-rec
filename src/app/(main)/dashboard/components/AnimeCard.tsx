@@ -12,7 +12,7 @@ export default function AnimeCard({ id, title, imageUrl, rating, onClick }: Anim
   return (
     <div
       onClick={onClick}
-      className="bg-[#2f2f31] p-3 rounded-md shadow hover:scale-[1.02] cursor-pointer border border-[#FF5DA2] transition duration-200 flex flex-col" // Add flex and flex-col
+      className="bg-[#2f2f31] p-3 rounded-md shadow hover:scale-[1.02] cursor-pointer border-2 border-[#6B4CA0] transition duration-200 flex flex-col" // Add flex and flex-col
     >
       <Image
         src={imageUrl}

@@ -28,7 +28,7 @@ export default function WatchlistSection({
 
       <section className="mb-12">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold text-[#FF5DA2] font-orbitron">
+          <h2 className="text-2xl font-semibold text-[#2FFFE2] font-orbitron">
             Anime on Your Watchlist
           </h2>
         </div>
@@ -49,7 +49,7 @@ export default function WatchlistSection({
 
             {/* Placeholder Card: always shown */}
             <div
-              className="bg-[#1d1d1f] border border-dashed border-[#FF5DA2] rounded-md flex flex-col items-center justify-center hover:opacity-90 hover:scale-[1.02] cursor-pointer transition p-4 text-center"
+              className="bg-[#1d1d1f] border border-dashed border-[#2FFFE2] rounded-md flex flex-col items-center justify-center hover:opacity-90 hover:scale-[1.02] cursor-pointer transition p-4 text-center"
               onClick={() => setShowModal(true)}
             >
               {animeList.length === 0 ? (
