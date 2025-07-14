@@ -24,7 +24,7 @@ export default function WatchlistSection({
 
   return (
     <>
-      {showModal && <SearchModal onClose={() => setShowModal(false)} mode="watchlist" onAdded={onRefresh}/>}
+      {showModal && <SearchModal onClose={() => setShowModal(false)} mode="watchlist" dashboard onAdded={onRefresh}/>}
 
       <section className="mb-12">
         <div className="flex justify-between items-center mb-4">

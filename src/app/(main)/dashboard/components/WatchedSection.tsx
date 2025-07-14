@@ -24,7 +24,7 @@ export default function WatchedSection({
 
   return (
     <>
-      {showModal && <SearchModal onClose={() => setShowModal(false)} mode="watched" onAdded={onRefresh}/>}
+      {showModal && <SearchModal onClose={() => setShowModal(false)} mode="watched" dashboard onAdded={onRefresh}/>}
 
       <section className="mb-12">
         <div className="flex justify-between items-center mb-4">

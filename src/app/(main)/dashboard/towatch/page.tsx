@@ -6,12 +6,14 @@ import ProtectedRoute from '@/app/components/ProtectedRoute'
 import Image from 'next/image'
 import { WatchlistAnime } from '@/lib/types'
 import WatchlistAnimeModal from '@/app/(main)/dashboard/components/WatchlistAnimeModal'
+import SearchModal from '../components/SearchModal'
 
-export default function ToWatchPage() {
+export default function WatchlistPage() {
   const [watchlist, setWatchlist] = useState<WatchlistAnime[]>([])
-  const [sortOption, setSortOption] = useState<'recent' | 'popularity'>('recent')
+  const [sortOption, setSortOption] = useState<'oldest' | 'recent' | 'popularity'>('oldest')
   const [selectedAnime, setSelectedAnime] = useState<WatchlistAnime | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -28,16 +30,28 @@ export default function ToWatchPage() {
       return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
     } else if (sortOption === 'popularity') {
       return b.anilistScore - a.anilistScore
-    }
+    } else if (sortOption === 'oldest') {
+      return new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime()
+    } else 
     return 0
   })
 
-  const refreshWatchlist = async () => {
+  const refreshWatchlist = async (newAnime?: WatchlistAnime) => {
+    if (newAnime) {
+      setWatchlist((prev) => {
+        const exists = prev.some((a) => a.id === newAnime.id)
+        if (exists) return prev
+        return [newAnime, ...prev]
+      })
+      return
+    }
+
     setLoading(true)
     const data = await getWatchlistAnime()
     setWatchlist(data)
     setLoading(false)
   }
+
 
   return (
     <ProtectedRoute>
@@ -46,9 +60,10 @@ export default function ToWatchPage() {
           <h1 className="text-3xl font-bold text-[#2FFFE2] font-orbitron">Your Watchlist</h1>
           <select
             value={sortOption}
-            onChange={(e) => setSortOption(e.target.value as 'recent' | 'popularity')}
+            onChange={(e) => setSortOption(e.target.value as 'oldest' | 'recent' | 'popularity')}
             className="bg-[#2f2f31] text-white border border-[#FF5DA2] px-3 py-2 rounded font-semibold cursor-pointer"
           >
+            <option value="oldest">Oldest Added</option>
             <option value="recent">Most Recently Added</option>
             <option value="popularity">Most Popular (AniList Score)</option>
           </select>
@@ -81,6 +96,32 @@ export default function ToWatchPage() {
                 </p>
               </div>
             ))}
+            {showModal && <SearchModal
+              onClose={() => setShowModal(false)}
+              mode="watchlist"
+              onAdded={async () => {
+                await refreshWatchlist()
+                setShowModal(false)
+              }}
+            />
+            }
+
+        {/* Placeholder Card: always shown */}
+            <div
+              className="bg-[#1d1d1f] border border-dashed border-[#FF5DA2] rounded-md flex flex-col items-center justify-center hover:opacity-90 hover:scale-[1.02] cursor-pointer transition p-4 text-center"
+              onClick={() => setShowModal(true)}
+            >
+              {sortedList.length === 0 ? (
+                <>
+                  <span className="text-[#2FFFE2] font-semibold text-sm">+ Add to watchlist</span>
+                  <span className="text-[#2FFFE2] text-xs mt-1">Nothing here yet</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-[#FF5DA2] font-semibold text-sm">+ Add More</span>
+                </>
+              )}
+            </div>
           </div>
         )}
 

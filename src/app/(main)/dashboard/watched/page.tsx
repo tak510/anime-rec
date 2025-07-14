@@ -6,12 +6,14 @@ import ProtectedRoute from '@/app/components/ProtectedRoute'
 import Image from 'next/image'
 import { WatchedAnime } from '@/lib/types'
 import WatchedAnimeModal from '@/app/(main)/dashboard/components/WatchedAnimeModal'
+import SearchModal from '../components/SearchModal'
 
 export default function WatchedPage() {
   const [watchedList, setWatchedList] = useState<WatchedAnime[]>([])
   const [sortOption, setSortOption] = useState<'recent' | 'rating' | 'popularity'>('recent')
   const [selectedAnime, setSelectedAnime] = useState<WatchedAnime | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -88,6 +90,33 @@ export default function WatchedPage() {
                 </p>
               </div>
             ))}
+
+            {showModal && <SearchModal
+                          onClose={() => setShowModal(false)}
+                          mode="watched"
+                          onAdded={async () => {
+                            await refreshWatchedList()
+                            setShowModal(false)
+                          }}
+                        />
+            }
+            
+                    {/* Placeholder Card: always shown */}
+                        <div
+                          className="bg-[#1d1d1f] border border-dashed border-[#2FFFE2] rounded-md flex flex-col items-center justify-center hover:opacity-90 hover:scale-[1.02] cursor-pointer transition p-4 text-center"
+                          onClick={() => setShowModal(true)}
+                        >
+                          {sortedList.length === 0 ? (
+                            <>
+                              <span className="text-[#FF5DA2] font-semibold text-sm">+ Add to watched</span>
+                              <span className="text-[#FF5DA2] text-xs mt-1">Nothing here yet</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-[#2FFFE2] font-semibold text-sm">+ Add More</span>
+                            </>
+                          )}
+                        </div>
           </div>
         )}
 

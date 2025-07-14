@@ -9,7 +9,8 @@ import { useRouter } from 'next/navigation'
 type SearchModalProps = {
   onClose: () => void
   mode: 'watched' | 'watchlist'
-  onAdded?: () => void
+  dashboard?: boolean
+  onAdded?: (anime?: AnimeSearchResult) => void
 }
 
 type AnimeSearchResult = {
@@ -31,7 +32,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
-export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps) {
+export default function SearchModal({ onClose, mode, dashboard, onAdded }: SearchModalProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<AnimeSearchResult[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -120,7 +121,9 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
       setQuery('')
       setResults([])
       setExistingIds((prev) => [...prev, anime.id])
-      if (onAdded) onAdded()
+
+      if (onAdded) onAdded(anime)
+      onClose()  // Auto-close modal
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred.'
       alert(`❌ Failed to add anime: ${errorMsg}`)
@@ -129,6 +132,7 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
       setAdding(null)
     }
   }
+
 
   const fullListPath = mode === 'watched' ? '/dashboard/watched' : '/dashboard/towatch'
 
@@ -188,23 +192,24 @@ export default function SearchModal({ onClose, mode, onAdded }: SearchModalProps
                 <button
                   disabled={adding === anime.id}
                   onClick={() => handleAdd(anime)}
-                  className="bg-[#2FFFE2] text-black text-sm px-3 py-1 rounded hover:bg-opacity-80 transition disabled:opacity-50"
+                  className="bg-[#2FFFE2] text-black text-sm px-3 py-1 cursor-pointer rounded hover:bg-opacity-80 transition disabled:opacity-50"
                 >
                   {adding === anime.id ? 'Adding...' : 'Add'}
                 </button>
               </li>
             ))}
         </ul>
-
-        <button
-          className="mt-6 w-full bg-[#FF5DA2] text-white font-semibold py-2 rounded hover:opacity-90 transition cursor-pointer"
-          onClick={() => {
-            onClose()
-            router.push(fullListPath)
-          }}
-        >
-          View Full {mode === 'watched' ? 'Watched list' : 'Watchlist'}
-        </button>
+        {dashboard && (
+          <button
+            className="mt-6 w-full bg-[#FF5DA2] text-white font-semibold py-2 rounded hover:opacity-90 transition cursor-pointer"
+            onClick={() => {
+              onClose()
+              router.push(fullListPath)
+            }}
+          >
+            View Full {mode === 'watched' ? 'Watched list' : 'Watchlist'}
+          </button>
+        )}
       </div>
     </div>
   )
