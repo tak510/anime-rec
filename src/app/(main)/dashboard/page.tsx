@@ -5,29 +5,35 @@ import ProtectedRoute from '@/app/components/ProtectedRoute'
 import WatchlistSection from './components/WatchlistSection'
 import WatchedSection from './components/WatchedSection'
 import WatchedAnimeModal from './components/WatchedAnimeModal'
-import { getWatchedAnime, getWatchlistAnime } from '@/lib/supabase'
-import { WatchedAnime, WatchlistAnime } from '@/lib/types'
+import WatchingAnimeModal from './components/WatchingAnimeModal'
+import { getWatchedAnime, getWatchingAnime, getWatchlistAnime } from '@/lib/supabase'
+import { WatchedAnime, WatchingAnime, WatchlistAnime } from '@/lib/types'
 import WatchlistAnimeModal from './components/WatchlistAnimeModal'
+import WatchingSection from './components/WatchingSection'
 
 export default function DashboardPage() {
   const [watchedList, setWatchedList] = useState<WatchedAnime[]>([])
   const [watchlist, setWatchlist] = useState<WatchlistAnime[]>([])
+  const [watchinglist, setWatchinglist] = useState<WatchingAnime[]>([])
   const [selectedWatchedAnime, setSelectedWatchedAnime] = useState<WatchedAnime | null>(null)
   const [selectedWatchlistAnime, setSelectedWatchlistAnime] = useState<WatchlistAnime | null>(null)
+  const [selectedWatchingAnime, setSelectedWatchingAnime] = useState<WatchingAnime | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [watchedData, watchlistData] = await Promise.all([
+        const [watchedData, watchlistData, watchingData] = await Promise.all([
           getWatchedAnime(),
           getWatchlistAnime(),
+          getWatchingAnime(),
         ])
 
         watchedData.sort((a, b) => new Date(b.watchedAt).getTime() - new Date(a.watchedAt).getTime())
 
         setWatchedList(watchedData)
         setWatchlist(watchlistData)
+        setWatchinglist(watchingData)
       } catch (err) {
         console.error('Error fetching dashboard data:', err)
       } finally {
@@ -49,6 +55,11 @@ export default function DashboardPage() {
     setWatchlist(data)
   }
 
+  const refreshWatchinglist = async () => {
+    const data = await getWatchingAnime()
+    setWatchinglist(data)
+  }
+
 
   return (
     <ProtectedRoute>
@@ -56,6 +67,13 @@ export default function DashboardPage() {
         <h1 className="text-4xl font-orbitron text-center mb-10">Your Anime Dashboard</h1>
 
         <div className="grid gap-12">
+          <WatchingSection
+            animeList={watchinglist}
+            loading={loading}
+            onAnimeClick={setSelectedWatchingAnime}
+            onRefresh={refreshWatchinglist}
+          />
+
           <WatchlistSection
             animeList={watchlist}
             loading={loading}
@@ -85,6 +103,14 @@ export default function DashboardPage() {
             anime={selectedWatchlistAnime}
             onClose={() => setSelectedWatchlistAnime(null)}
             onUpdate={refreshWatchlist}
+          />
+        )}
+
+        {selectedWatchingAnime && (
+          <WatchingAnimeModal
+            anime={selectedWatchingAnime}
+            onClose={() => setSelectedWatchingAnime(null)}
+            onUpdate={refreshWatchinglist}
           />
         )}
       </main>

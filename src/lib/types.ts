@@ -25,3 +25,13 @@ export type WatchlistAnime = {
   anilistScore: number
   description: string
 }
+
+export type WatchingAnime = {
+  id: string
+  title: string
+  imageUrl: string
+  rating: number
+  startedWatching: string
+  anilistScore: number
+  description: string
+}

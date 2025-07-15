@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { fetchAnimeSearch } from '@/lib/anilist'
-import { addToWatched, addToWatchlist, getWatchedAnime, getWatchlistAnime } from '@/lib/supabase'
+import { addToWatched, addToWatching, addToWatchlist, getWatchedAnime, getWatchlistAnime, getWatchingAnime } from '@/lib/supabase'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 type SearchModalProps = {
   onClose: () => void
-  mode: 'watched' | 'watchlist'
+  mode: 'watched' | 'watchlist' | 'watching'
   dashboard?: boolean
   onAdded?: (anime?: AnimeSearchResult) => void
 }
@@ -48,7 +48,7 @@ export default function SearchModal({ onClose, mode, dashboard, onAdded }: Searc
     const loadExisting = async () => {
       try {
         const list =
-          mode === 'watched' ? await getWatchedAnime() : await getWatchlistAnime()
+          mode === 'watched' ? await getWatchedAnime() : mode === 'watching' ? await getWatchingAnime() : await getWatchlistAnime()
         setExistingIds(list.map((anime) => Number(anime.id)))
       } catch (err) {
         console.error('Failed to load existing anime:', err)
@@ -110,6 +110,11 @@ export default function SearchModal({ onClose, mode, dashboard, onAdded }: Searc
           anilistId: anime.id,
           rating: anime.averageScore ?? undefined,
         })
+      } else if (mode === 'watching') {
+        await addToWatching({
+          anilistId: anime.id,
+          rating: anime.averageScore ?? undefined,
+        })
       } else {
         await addToWatchlist({
           anilistId: anime.id,
@@ -134,7 +139,7 @@ export default function SearchModal({ onClose, mode, dashboard, onAdded }: Searc
   }
 
 
-  const fullListPath = mode === 'watched' ? '/dashboard/watched' : '/dashboard/towatch'
+  const fullListPath = mode === 'watched' ? '/dashboard/watched' : mode === 'watching' ? '/dashboard/watching' : '/dashboard/towatch'
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
@@ -147,7 +152,7 @@ export default function SearchModal({ onClose, mode, dashboard, onAdded }: Searc
         </button>
 
         <h2 className="text-2xl font-bold mb-4">
-          Add to {mode === 'watched' ? 'Watched' : 'Watchlist'}
+          Add to {mode === 'watched' ? 'Watched' : mode === 'watching' ? 'Currently Watching' : 'Watchlist'}
         </h2>
 
         <input
@@ -207,7 +212,7 @@ export default function SearchModal({ onClose, mode, dashboard, onAdded }: Searc
               router.push(fullListPath)
             }}
           >
-            View Full {mode === 'watched' ? 'Watched list' : 'Watchlist'}
+            View Full {mode === 'watched' ? 'Watched list' : mode === 'watchlist' ? 'Watchlist' : 'Currently Watching list'}
           </button>
         )}
       </div>
