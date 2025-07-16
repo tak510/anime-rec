@@ -36,6 +36,56 @@ export default function WatchlistAnimeModal({ anime, onClose, onUpdate }: Props)
     }
   }
 
+  const handleMoveToWatching = async () => {
+    const confirm = window.confirm(
+      'Move this anime to currently watching?'
+    )
+    if(!confirm) return
+
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData?.user?.id) throw new Error('User not found')
+      
+      await supabase
+        .from('anime_entries')
+        .update({status: 'watching'})
+        .eq('user_id', userData.user.id)
+        .eq('anilist_id', anime.id)
+
+      alert('Moved to currently watching.')
+      await onUpdate()
+      onClose()  
+    } catch (err) {
+      alert('Failed to move anime')
+      console.error(err)
+    }
+  }
+
+  const handleMoveToWatched = async () => {
+    const confirm = window.confirm(
+      'Move this anime to watched list?'
+    )
+    if(!confirm) return
+
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData?.user?.id) throw new Error('User not found')
+      
+      await supabase
+        .from('anime_entries')
+        .update({status: 'completed'})
+        .eq('user_id', userData.user.id)
+        .eq('anilist_id', anime.id)
+
+      alert('Moved to watched list.')
+      await onUpdate()
+      onClose()  
+    } catch (err) {
+      alert('Failed to move anime')
+      console.error(err)
+    }
+  }
+
   const description = (anime.description || '')
     .replace(/<br\s*\/?>/gi, '')
     .replace(/<\/?[^>]+(>|$)/g, '')
@@ -81,12 +131,19 @@ export default function WatchlistAnimeModal({ anime, onClose, onUpdate }: Props)
               >
                 Remove from Watchlist
               </button>
-              {/* Placeholder for future: Move to Watching */}
+
               <button
-                disabled
-                className="px-4 py-2 bg-gray-700 text-white rounded opacity-50 cursor-not-allowed"
+                onClick={handleMoveToWatching}
+                className="px-4 py-2 bg-white text-black rounded opacity-50 cursor-pointer"
               >
-                Move to Watching (Coming Soon)
+                Move to &apos;Currently Watching&apos;
+              </button>
+
+              <button
+                onClick={handleMoveToWatched}
+                className="px-4 py-2 bg-white text-black rounded opacity-50 cursor-pointer"
+              >
+                Move to Watched
               </button>
             </div>
           </div>

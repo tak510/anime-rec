@@ -69,6 +69,31 @@ export default function WatchingAnimeModal({
     }
   }
 
+  const handleMoveToWatched = async () => {
+      const confirm = window.confirm(
+        'Move this anime to watched list?'
+      )
+      if(!confirm) return
+  
+      try {
+        const { data: userData, error: userError } = await supabase.auth.getUser()
+        if (userError || !userData?.user?.id) throw new Error('User not found')
+        
+        await supabase
+          .from('anime_entries')
+          .update({status: 'completed'})
+          .eq('user_id', userData.user.id)
+          .eq('anilist_id', anime.id)
+  
+        alert('Moved to watched list.')
+        await onUpdate()
+        onClose()  
+      } catch (err) {
+        alert('Failed to move anime')
+        console.error(err)
+      }
+    }
+
   const description = (anime.description || '')
     .replace(/<br\s*\/?>/gi, '')
     .replace(/<\/?[^>]+(>|$)/g, '') // Strip other HTML tags
@@ -138,6 +163,13 @@ export default function WatchingAnimeModal({
               className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
             >
               Remove from List
+            </button>
+
+            <button
+              onClick={handleMoveToWatched}
+              className="px-4 py-2 bg-white text-black rounded hover:bg-red-700 transition cursor-pointer"
+            >
+              Move to Completed
             </button>
           </div>
         </div>
