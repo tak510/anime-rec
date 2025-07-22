@@ -1,6 +1,6 @@
 import { Anime } from "./types";
 
-export async function fetchPopularAnime(numResults: number = 100) {
+export async function fetchPopularAnime(perPage: number, page: number) {
   const query = `
     query PopularAnime($page: Int, $perPage: Int) {
       Page(page: $page, perPage: $perPage) {
@@ -19,15 +19,11 @@ export async function fetchPopularAnime(numResults: number = 100) {
     }
   `;
 
-  const animes: Anime[] = [];
-  let page = 1;
-  const perPageLimit = 50; // AniList API perPage limit
-
-  while (animes.length < numResults) {
+  try {
     const res = await fetch('https://graphql.anilist.co', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables: { page, perPage: perPageLimit } }),
+      body: JSON.stringify({ query, variables: { page, perPage } }),
       next: { revalidate: 86400 },
     });
 
@@ -35,19 +31,93 @@ export async function fetchPopularAnime(numResults: number = 100) {
 
     if (json.errors) {
       console.error("AniList API Errors:", json.errors);
-      break;
+      return [];
     }
-
-    const currentPageMedia = json.data.Page.media as Anime[];
-    animes.push(...currentPageMedia);
-
-    if (!json.data.Page.pageInfo.hasNextPage || animes.length >= numResults) {
-      break;
-    }
-    page++;
+    return json.data.Page.media as Anime[];
+  } catch (error) {
+    console.error("Error fetching popular anime:", error);
+    return [];
   }
+}
 
-  return animes.slice(0, numResults);
+export async function fetchTrendingAnime(perPage: number, page: number) {
+  const query = `
+    query TrendingAnime($page: Int, $perPage: Int) {
+      Page(page: $page, perPage: $perPage) {
+        pageInfo {
+          hasNextPage
+        }
+        media(type: ANIME, sort: TRENDING_DESC) { # Changed sort to TRENDING_DESC
+          id
+          title { userPreferred }
+          coverImage { large }
+          averageScore
+          genres
+          description
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await fetch('https://graphql.anilist.co', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { page, perPage } }),
+      next: { revalidate: 86400 },
+    });
+
+    const json = await res.json();
+
+    if (json.errors) {
+      console.error("AniList API Errors:", json.errors);
+      return [];
+    }
+    return json.data.Page.media as Anime[];
+  } catch (error) {
+    console.error("Error fetching trending anime:", error);
+    return [];
+  }
+}
+
+export async function fetchUpcomingAnime(perPage: number, page: number) {
+  const query = `
+    query UpcomingAnime($page: Int, $perPage: Int) {
+      Page(page: $page, perPage: $perPage) {
+        pageInfo {
+          hasNextPage
+        }
+        media(type: ANIME, sort: START_DATE_DESC, status: NOT_YET_RELEASED) { # Changed sort and added status
+          id
+          title { userPreferred }
+          coverImage { large }
+          averageScore
+          genres
+          description
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await fetch('https://graphql.anilist.co', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { page, perPage } }),
+      next: { revalidate: 86400 },
+    });
+
+    const json = await res.json();
+
+    if (json.errors) {
+      console.error("AniList API Errors:", json.errors);
+      return [];
+    }
+    return json.data.Page.media as Anime[];
+  } catch (error) {
+    console.error("Error fetching upcoming anime:", error);
+    return [];
+  }
 }
 
 export async function fetchAnimeSearch(search: string) {
