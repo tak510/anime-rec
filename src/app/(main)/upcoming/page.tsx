@@ -1,3 +1,5 @@
+/* File is currently not used, due to implementation constraints. May revisit sometime in the future */
+
 'use client'
 
 import Image from 'next/image'

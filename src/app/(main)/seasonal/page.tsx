@@ -42,7 +42,7 @@ export default function SeasonalPage() {
   const years = useMemo(() => {
     const arr = [];
     const current = new Date().getFullYear();
-    for (let i = current + 2; i >= current - 5; i--) {
+    for (let i = current + 2; i >= current - 5; i--) { // Range is last 5 years + 2 years into the future
       arr.push(i);
     }
     return arr;
