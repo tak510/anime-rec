@@ -181,3 +181,50 @@ export async function fetchAnimeByIds(ids: number[]): Promise<Record<number, Ani
 
   return animeMap
 }
+
+export async function fetchSeasonalAnime(perPage: number, page: number, season: string, seasonYear: number) {
+  const query = `
+    query SeasonalAnime($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear: Int) {
+      Page(page: $page, perPage: $perPage) {
+        pageInfo {
+          hasNextPage
+        }
+        media(type: ANIME, season: $season, seasonYear: $seasonYear, sort: POPULARITY_DESC) {
+          id
+          title { userPreferred }
+          coverImage { large }
+          averageScore
+          genres
+          description
+          episodes
+          status
+          startDate {
+            year
+            month
+            day
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const res = await fetch('https://graphql.anilist.co', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { page, perPage, season, seasonYear } }),
+      next: { revalidate: 86400 }, // You might want to adjust revalidate for seasonal data, maybe shorter for current season.
+    });
+
+    const json = await res.json();
+
+    if (json.errors) {
+      console.error("AniList API Errors:", json.errors);
+      return [];
+    }
+    return json.data.Page.media as Anime[];
+  } catch (error) {
+    console.error("Error fetching seasonal anime:", error);
+    return [];
+  }
+}

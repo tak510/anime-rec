@@ -37,7 +37,7 @@ export default function Navbar() {
           { name: 'Recommended For You', href: '/recommended' },
           { name: 'Popular', href: '/popular' },
           { name: 'Trending', href: '/trending' },
-          { name: 'Upcoming', href: '/upcoming' },
+          { name: 'Seasonal', href: '/seasonal' },
         ].map((item) => (
           <Link
             key={item.name}
